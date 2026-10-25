@@ -1,0 +1,79 @@
+/* Meal app look. Same colors and buttons as the workout app:
+   orange FCE4D6 / F4B183, blue DDEBF7 / 9DC3E6, green E2EFDA / A9D18E */
+:root{
+  --bg:#f6f3ee; --ink:#1b1b1b; --muted:#555; --card:#ffffff; --line:#cfc8b8;
+  --warm-fill:#FCE4D6; --warm-line:#F4B183;
+  --work-fill:#DDEBF7; --work-line:#9DC3E6;
+  --cool-fill:#E2EFDA; --cool-line:#A9D18E;
+  --fill:var(--work-fill); --edge:var(--work-line);
+  --btn:#1c2633; --btn-ink:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-text-size-adjust:100%;line-height:1.35}
+body{min-height:100vh;min-height:100dvh}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit}
+[hidden]{display:none!important}
+
+/* ---------- generic ---------- */
+.screen{max-width:980px;margin:0 auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
+h1{font-size:26px;margin:4px 0 2px}
+.sub{margin:0 0 14px;color:var(--muted)}
+.btn{min-height:52px;padding:10px 18px;border:2px solid var(--btn);border-radius:12px;background:var(--btn);color:var(--btn-ink);font-weight:700;font-size:18px}
+.btn.alt{background:#fff;color:var(--btn)}
+.btn.small{min-height:44px;font-size:16px;padding:8px 14px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:focus-visible,input:focus-visible,.row:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px}
+.link{background:none;border:0;padding:8px 0;color:#1d4ed8;text-decoration:underline;font-size:16px}
+
+.sec{border:2px solid var(--edge);background:var(--fill);border-radius:14px;padding:10px 12px;margin:12px 0}
+.sec.warm{--fill:var(--warm-fill);--edge:var(--warm-line)}
+.sec.work{--fill:var(--work-fill);--edge:var(--work-line)}
+.sec.cool{--fill:var(--cool-fill);--edge:var(--cool-line)}
+.sec h2{font-size:20px;margin:0 0 6px}
+.rows{display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;min-height:48px;padding:8px 10px;background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px}
+.row .n{font-weight:700;min-width:1.6em}
+.row .who{display:block;font-size:14px;color:var(--muted)}
+.row .t{flex:1}
+/* ---------- meal screens ---------- */
+.screen h2.part{font-size:22px;margin:18px 0 6px}
+.scr-h{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}
+.purpose{margin:0 0 12px;color:var(--muted);font-style:italic}
+.today-top{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px;margin:8px 0 12px}
+.today-top .d{font-size:22px;font-weight:800}
+.today-top .w{font-size:18px;color:var(--muted);font-weight:700}
+.menu1{--fill:var(--work-fill);--edge:var(--work-line)}
+.menu2{--fill:var(--cool-fill);--edge:var(--cool-line)}
+.sea{--fill:var(--warm-fill);--edge:var(--warm-line)}
+.opt{border:2px solid var(--edge);background:var(--fill);border-radius:12px;padding:10px 12px;margin:8px 0}
+.opt .ol{font-weight:800;margin:0 0 6px}
+.opt .pl{background:rgba(255,255,255,.75);border:1px solid var(--edge);border-radius:10px;padding:8px 10px;margin:6px 0}
+.opt .pl .who{display:block;font-size:14px;font-weight:700;color:var(--muted);margin-bottom:2px}
+.picks{margin:6px 0 2px}
+.picks .lab{font-size:14px;font-weight:700;color:var(--muted);margin:6px 0 4px}
+.picks .seg{margin-top:0;flex-wrap:wrap}
+.picks .seg .btn{min-height:48px;font-size:16px;padding:6px 10px}
+.picks .seg .btn.on{background:var(--btn);color:#fff}
+.picks .seg .btn.off{background:#fff;color:var(--btn)}
+.meal-h{font-size:20px;margin:16px 0 4px}
+.nav{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.nav .btn{width:100%;text-align:left}
+ul.pl-list{padding-left:22px;margin:6px 0 12px}
+ul.pl-list li{margin:6px 0}
+ul.pl-list ul{margin:6px 0;padding-left:20px}
+.sublabel{font-weight:800;margin:14px 0 4px}
+.kv{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+.kv b{display:block}
+.kv .k{display:block;font-size:14px;font-weight:700;color:var(--muted);margin-top:6px}
+.hday{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+.hday b{display:block;margin-bottom:4px}
+.hday p{margin:2px 0}
+.back{margin-bottom:6px}
+
+.hbtns{display:flex;gap:10px;margin-top:14px}
+.hbtns .btn{flex:1}
+.seg{display:flex;gap:8px;margin-top:6px}
+.seg .btn{flex:1}
