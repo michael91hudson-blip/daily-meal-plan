@@ -88,3 +88,9 @@ ul.pl-list ul{margin:6px 0;padding-left:20px}
 .viewsw{margin:6px 0 10px}
 .viewsw .btn.on{background:var(--btn);color:#fff}
 .viewsw .btn.off{background:#fff;color:var(--btn)}
+
+/* the app's own explanations, menu usage lines and the "this week" tag */
+.help{margin:4px 0 10px;color:var(--muted);font-style:italic;font-size:15px}
+.navsub{display:block;font-size:14px;font-weight:400;margin-top:2px}
+.tag{display:inline-block;font-size:13px;font-weight:800;padding:2px 10px;border:2px solid var(--btn);border-radius:999px;background:#fff;color:var(--btn);margin-top:6px}
+.nav .btn .tag{display:table}

@@ -89,6 +89,8 @@
     });
     return seg;
   }
+  function helpLine(text) { return h('p', { class: 'help' }, text); }
+  function thisWeeksMenu(idx) { var now = new Date(); return weekOf(now) > 0 && menuOf(now) === idx; }
   function optionCard(menuIdx, row, view) {
     if (view === 'his' && row.seafood) return null;
     var cls = 'opt ' + (row.seafood ? 'sea' : 'menu' + (menuIdx + 1));
@@ -115,6 +117,10 @@
     var head = h('button', { class: 'acc-head', type: 'button', 'aria-expanded': open ? 'true' : 'false' },
       h('span', { class: 'acc-name' }, meal.name), arrow, sub);
     var body = h('div', { class: 'acc-body' });
+    if (iso) {
+      body.appendChild(helpLine(C.help.openLine));
+      if (view !== 'his' && meal.rows.some(function (r) { return r.seafood; })) body.appendChild(helpLine(C.help.seafoodLine));
+    }
     meal.rows.forEach(function (r) { var c = optionCard(menuIdx, r, view); if (c) body.appendChild(c); });
     if (iso) {
       var picks = h('div', { class: 'picks' });
@@ -175,11 +181,17 @@
       h('div', { class: 'd' }, DAYS[now.getDay()] + ', ' + shortDate(now, false)),
       h('div', { class: 'w' }, w === 0 ? 'Plan starts Monday, Oct 26 \u00b7 Menu 1' : 'Week ' + w + ' \u00b7 Menu ' + (m + 1)));
     var scr = h('div', { class: 'screen' }, h('h1', {}, 'Meals'), top,
-      viewSwitch(function () { renderToday(true); }), mealsList(m, iso));
+      viewSwitch(function () { renderToday(true); }), helpLine(C.help.switchLine), helpLine(C.help.rowsLine), mealsList(m, iso));
     var nav = h('div', { class: 'nav' });
     function go(label, fn) { nav.appendChild(h('button', { class: 'btn alt', type: 'button', onclick: fn }, label)); }
-    go('Menu 1', function () { renderMenu(0); });
-    go('Menu 2', function () { renderMenu(1); });
+    function goMenu(idx) {
+      nav.appendChild(h('button', { class: 'btn alt', type: 'button', onclick: function () { renderMenu(idx); } },
+        h('span', {}, C.menus[idx].name),
+        h('span', { class: 'navsub' }, C.help.menuUse[idx]),
+        thisWeeksMenu(idx) ? h('span', { class: 'tag' }, C.help.thisWeek) : null));
+    }
+    goMenu(0);
+    goMenu(1);
     go(C.how.title, renderHow);
     go(C.dairy.title, renderDairy);
     go(C.rules.title, renderRules);
@@ -196,6 +208,8 @@
     if (!keepOpen) openMeal = null;
     appEl.textContent = '';
     var scr = h('div', { class: 'screen' }, backBtn(), h('h1', {}, C.menus[idx].name),
+      thisWeeksMenu(idx) ? h('span', { class: 'tag' }, C.help.thisWeek) : null,
+      helpLine(C.help.menuUse[idx]), helpLine(C.help.menuBrowse),
       viewSwitch(function () { renderMenu(idx, true); }), mealsList(idx, null));
     scr.appendChild(backBtn());
     appEl.appendChild(scr); window.scrollTo(0, y);
@@ -252,7 +266,7 @@
     appEl.textContent = '';
     var p = prune(allPicks()), keys = Object.keys(p).sort().reverse(), armed = false, tm = null;
     var list = h('div', {});
-    if (!keys.length) list.appendChild(h('p', { class: 'sub' }, 'No days yet.'));
+    if (!keys.length) list.appendChild(h('p', { class: 'sub' }, C.help.historyEmpty));
     keys.forEach(function (k) {
       var d = parseIso(k), mi = menuOf(d);
       list.appendChild(h('div', { class: 'hday' },
@@ -268,7 +282,7 @@
       clearTimeout(tm); store.set('picks', {}); renderHistory();
     };
     appEl.appendChild(h('div', { class: 'screen' },
-      h('h1', {}, 'Past days'), h('p', { class: 'sub' }, 'Your last 30 days, on this phone only.'), list,
+      h('h1', {}, 'Past days'), h('p', { class: 'sub' }, 'Your last 30 days, on this phone only.'), helpLine(C.help.historyLine), list,
       h('div', { class: 'hbtns' }, h('button', { class: 'btn', type: 'button', onclick: renderToday }, 'Back'), keys.length ? clr : null)));
     window.scrollTo(0, 0);
   }

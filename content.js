@@ -369,3 +369,18 @@ window.CONTENT = {
  }
 };
 window.CONTENT.plan = { start: '2026-10-26', weeks: 4 };
+/* Short explanations written for the app itself (not from the document). */
+window.CONTENT.help = {
+  switchLine: "Choose whose portions to show: His, Her, or Both. This phone remembers your choice.",
+  rowsLine: "Tap a meal to open its options. The line under each meal shows what is picked today.",
+  openLine: "Tap the option you ate under the pick buttons below. Tap it again to undo. Your picks stay on this phone.",
+  seafoodLine: "Seafood is her seafood option. She eats it instead of her regular portion of this meal.",
+  menuUse: [
+    "Weeks 1 and 3 (Oct 26 \u2013 Nov 1, Nov 9\u201315). Then it keeps alternating.",
+    "Weeks 2 and 4 (Nov 2\u20138, Nov 16\u201322). Then it keeps alternating."
+  ],
+  thisWeek: "This week's menu",
+  menuBrowse: "Browse this menu. To mark what you ate, go back to Today.",
+  historyLine: "Each day shows what you picked at each meal. Nothing is sent anywhere.",
+  historyEmpty: "No days yet. Picks you tap on the Today screen will show here."
+};
