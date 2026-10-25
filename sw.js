@@ -1,8 +1,8 @@
 /* Offline copy. Saves every file on the first visit. With a signal the newest
    files load; with no signal the saved files open. Change VERSION on each update. */
-var VERSION = 'meals-20261025';
+var VERSION = 'meals-20261025b';
 var FILES = [
-  './', 'index.html', 'styles.css?v=20261025', 'content.js?v=20261025', 'app.js?v=20261025',
+  './', 'index.html', 'styles.css?v=20261025b', 'content.js?v=20261025b', 'app.js?v=20261025b',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png'
 ];
 self.addEventListener('install', function (e) {

@@ -6,6 +6,7 @@
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var KEEP_DAYS = 30;
+  var openMeal = null; /* the meal row that is open on the current screen */
 
   /* ---------- small helpers ---------- */
   function h(tag, props) {
@@ -77,31 +78,60 @@
       return h('li', {}, it.t, it.sub && it.sub.length ? h('ul', {}, it.sub.map(function (s) { return h('li', {}, s); })) : null);
     }));
   }
-  function optionCard(menuIdx, row) {
+  /* ---------- His | Her | Both ---------- */
+  function getView() { var v = store.get('view', 'both'); return (v === 'his' || v === 'her') ? v : 'both'; }
+  function viewSwitch(onChange) {
+    var seg = h('div', { class: 'seg viewsw' });
+    [['his', 'His'], ['her', 'Her'], ['both', 'Both']].forEach(function (x) {
+      var on = getView() === x[0];
+      seg.appendChild(h('button', { class: 'btn ' + (on ? 'on' : 'off'), type: 'button', 'aria-pressed': on ? 'true' : 'false',
+        onclick: function () { store.set('view', x[0]); onChange(); } }, x[1]));
+    });
+    return seg;
+  }
+  function optionCard(menuIdx, row, view) {
+    if (view === 'his' && row.seafood) return null;
     var cls = 'opt ' + (row.seafood ? 'sea' : 'menu' + (menuIdx + 1));
     var parts = [h('p', { class: 'ol' }, row.opt)];
-    if (!row.seafood) parts.push(h('div', { class: 'pl' }, h('span', { class: 'who' }, 'His portion'), row.his));
-    parts.push(h('div', { class: 'pl' }, h('span', { class: 'who' }, 'Her portion'), row.her));
+    if (!row.seafood && view !== 'her') parts.push(h('div', { class: 'pl' }, h('span', { class: 'who' }, 'His portion'), row.his));
+    if (view !== 'his') parts.push(h('div', { class: 'pl' }, h('span', { class: 'who' }, 'Her portion'), row.her));
     return h('div', { class: cls }, parts);
   }
-  function mealBlock(menuIdx, meal, iso) {
-    var box = h('div', { class: 'menu' + (menuIdx + 1) });
-    box.appendChild(h('h2', { class: 'meal-h' }, meal.name));
-    meal.rows.forEach(function (r) { box.appendChild(optionCard(menuIdx, r)); });
+  function pickWord(meal, p) {
+    if (p === undefined) return 'no pick';
+    var sea = meal.rows.filter(function (r) { return r.seafood; })[0];
+    return (sea && p === sea.opt) ? 'Seafood' : p;
+  }
+  function pickSummary(iso, meal, view) {
+    var bits = [];
+    if (view !== 'her') bits.push('His: ' + pickWord(meal, getPick(iso, 'his', meal.name)));
+    if (view !== 'his') bits.push('Her: ' + pickWord(meal, getPick(iso, 'her', meal.name)));
+    return bits.join(' · ');
+  }
+  /* one meal as a tap-to-open row */
+  function mealRow(menuIdx, meal, iso, view, open, onHead) {
+    var sub = iso ? h('span', { class: 'acc-sub' }, pickSummary(iso, meal, view)) : null;
+    var arrow = h('span', { class: 'acc-arrow', 'aria-hidden': 'true' }, open ? '▾' : '▸');
+    var head = h('button', { class: 'acc-head', type: 'button', 'aria-expanded': open ? 'true' : 'false' },
+      h('span', { class: 'acc-name' }, meal.name), arrow, sub);
+    var body = h('div', { class: 'acc-body' });
+    meal.rows.forEach(function (r) { var c = optionCard(menuIdx, r, view); if (c) body.appendChild(c); });
     if (iso) {
       var picks = h('div', { class: 'picks' });
       ['his', 'her'].forEach(function (who) {
+        if ((who === 'his' && view === 'her') || (who === 'her' && view === 'his')) return;
         var seg = h('div', { class: 'seg' });
-        var labels = meal.rows.filter(function (r) { return who === 'her' || !r.seafood; });
-        labels.forEach(function (r) {
-          var text = r.seafood ? 'Seafood' : r.opt;
-          var b = h('button', { class: 'btn', type: 'button' }, text);
+        meal.rows.filter(function (r) { return who === 'her' || !r.seafood; }).forEach(function (r) {
+          var b = h('button', { class: 'btn', type: 'button' }, r.seafood ? 'Seafood' : r.opt);
           function paint() {
             var on = getPick(iso, who, meal.name) === r.opt;
             b.className = 'btn ' + (on ? 'on' : 'off');
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
           }
-          b.onclick = function () { setPick(iso, who, meal.name, r.opt); repaint(); };
+          b.onclick = function () {
+            setPick(iso, who, meal.name, r.opt); repaint();
+            sub.textContent = pickSummary(iso, meal, view);
+          };
           b._paint = paint; paint();
           seg.appendChild(b);
         });
@@ -109,20 +139,43 @@
         picks.appendChild(seg);
       });
       function repaint() { Array.prototype.forEach.call(picks.querySelectorAll('button'), function (b) { b._paint(); }); }
-      box.appendChild(picks);
+      body.appendChild(picks);
     }
+    body.hidden = !open;
+    var box = h('div', { class: 'acc menu' + (menuIdx + 1) }, head, body);
+    box._open = function (on) {
+      body.hidden = !on; arrow.textContent = on ? '▾' : '▸'; head.setAttribute('aria-expanded', on ? 'true' : 'false');
+    };
+    head.onclick = function () { onHead(box, meal.name, head); };
     return box;
+  }
+  /* all meals of a menu; opening one closes the others */
+  function mealsList(menuIdx, iso) {
+    var view = getView(), list = h('div', { class: 'acclist' }), rows = [];
+    C.menus[menuIdx].meals.forEach(function (meal) {
+      var row = mealRow(menuIdx, meal, iso, view, openMeal === meal.name, function (box, name, head) {
+        var willOpen = openMeal !== name;
+        rows.forEach(function (r) { r._open(false); });
+        openMeal = willOpen ? name : null;
+        if (willOpen) { box._open(true); head.scrollIntoView({ block: 'start' }); }
+      });
+      rows.push(row); list.appendChild(row);
+    });
+    return list;
   }
 
   /* ---------- screens ---------- */
-  function renderToday() {
+  function renderToday(keepOpen) {
+    keepOpen = keepOpen === true;
+    var y = keepOpen ? window.scrollY : 0;
+    if (!keepOpen) openMeal = null;
     var now = new Date(), iso = isoOf(now), w = weekOf(now), m = menuOf(now);
     appEl.textContent = '';
     var top = h('div', { class: 'today-top' },
       h('div', { class: 'd' }, DAYS[now.getDay()] + ', ' + shortDate(now, false)),
-      h('div', { class: 'w' }, w === 0 ? 'Plan starts Monday, Oct 26 · Menu 1' : 'Week ' + w + ' · Menu ' + (m + 1)));
-    var scr = h('div', { class: 'screen' }, h('h1', {}, 'Meals'), top);
-    C.menus[m].meals.forEach(function (meal) { scr.appendChild(mealBlock(m, meal, iso)); });
+      h('div', { class: 'w' }, w === 0 ? 'Plan starts Monday, Oct 26 \u00b7 Menu 1' : 'Week ' + w + ' \u00b7 Menu ' + (m + 1)));
+    var scr = h('div', { class: 'screen' }, h('h1', {}, 'Meals'), top,
+      viewSwitch(function () { renderToday(true); }), mealsList(m, iso));
     var nav = h('div', { class: 'nav' });
     function go(label, fn) { nav.appendChild(h('button', { class: 'btn alt', type: 'button', onclick: fn }, label)); }
     go('Menu 1', function () { renderMenu(0); });
@@ -135,14 +188,17 @@
     go('Past days', renderHistory);
     scr.appendChild(nav);
     appEl.appendChild(scr);
-    window.scrollTo(0, 0);
+    window.scrollTo(0, y);
   }
-  function renderMenu(idx) {
+  function renderMenu(idx, keepOpen) {
+    keepOpen = keepOpen === true;
+    var y = keepOpen ? window.scrollY : 0;
+    if (!keepOpen) openMeal = null;
     appEl.textContent = '';
-    var scr = h('div', { class: 'screen' }, backBtn(), h('h1', {}, C.menus[idx].name));
-    C.menus[idx].meals.forEach(function (meal) { scr.appendChild(mealBlock(idx, meal, null)); });
+    var scr = h('div', { class: 'screen' }, backBtn(), h('h1', {}, C.menus[idx].name),
+      viewSwitch(function () { renderMenu(idx, true); }), mealsList(idx, null));
     scr.appendChild(backBtn());
-    appEl.appendChild(scr); window.scrollTo(0, 0);
+    appEl.appendChild(scr); window.scrollTo(0, y);
   }
   function renderHow() {
     appEl.textContent = '';

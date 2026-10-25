@@ -77,3 +77,14 @@ ul.pl-list ul{margin:6px 0;padding-left:20px}
 .hbtns .btn{flex:1}
 .seg{display:flex;gap:8px;margin-top:6px}
 .seg .btn{flex:1}
+
+/* tap-to-open meal rows and the His | Her | Both switch */
+.acc{margin:8px 0}
+.acc-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;width:100%;text-align:left;min-height:60px;padding:10px 14px;border:2px solid var(--edge);border-radius:12px;background:var(--fill)}
+.acc-name{font-size:20px;font-weight:800}
+.acc-arrow{font-size:20px}
+.acc-sub{flex-basis:100%;font-size:15px;color:var(--muted);margin-top:2px}
+.acc-body{padding:2px 0 6px}
+.viewsw{margin:6px 0 10px}
+.viewsw .btn.on{background:var(--btn);color:#fff}
+.viewsw .btn.off{background:#fff;color:var(--btn)}
